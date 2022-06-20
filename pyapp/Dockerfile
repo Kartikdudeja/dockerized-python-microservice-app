@@ -1,12 +1,19 @@
 # base image
-FROM python:3.9
+#FROM python:3.6-alpine
+FROM python:slim
 
 WORKDIR /src
 
-# dependencies
-COPY requirements.txt /code/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY requirements.txt /src/requirements.txt
 
-COPY ./code /src/app
+RUN python -m pip install --upgrade pip
+#RUN pip install -r requirements.txt
+RUN pip install wheel
+RUN pip install uvicorn
+RUN pip install "fastapi[all]"
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+COPY ./code /src/
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
