@@ -1,0 +1,7 @@
+wheel
+uvicorn
+fastapi[all]
+sqlalchemy
+redis
+psycopg2
+psycopg2-binary

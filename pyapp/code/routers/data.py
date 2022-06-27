@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter
 
-from schemas import Data, DataResponse
+from .schemas import Data
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ router = APIRouter (
     prefix= "/apigw/data"
 )
 
-@router.post ("/", response_model= DataResponse)
+@router.post ("/", response_model= Data)
 async def createData (body: Data):
     logger.info (f'create data request received for {body.recipient}, {body.message}')
     res_status = "success"

@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter
 
-from schemas import Login, LoginResponse, SignUp, SignUpResponse
+from .schemas import Login, LoginResponse, SignUp, SignUpResponse
 
 logger = logging.getLogger(__name__)
 

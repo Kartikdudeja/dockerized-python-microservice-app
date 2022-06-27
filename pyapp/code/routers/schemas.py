@@ -19,9 +19,5 @@ class SignUpResponse (BaseModel, extra=Extra.forbid):
     username: EmailStr
 
 class Data (BaseModel, extra=Extra.forbid):
-    recipient: EmailStr
-    message: str
-
-class DataResponse (BaseModel, extra=Extra.forbid):
-    status: str
-    id: int
+    key: str
+    value: str

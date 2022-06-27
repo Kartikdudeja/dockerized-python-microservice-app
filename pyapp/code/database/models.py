@@ -1,0 +1,33 @@
+# Defines Tables Defination 
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.sql.expression import text
+from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.orm import relationship
+
+from .database import Base
+
+class Users(Base):
+    __tablename__ = "users"
+
+    # 'users' table store the information about Users
+
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class Data(Base):
+    __tablename__ = "data"
+
+    # 'data' table store the key-value pair
+
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
+    key = Column(String, primary_key=True, index=True, nullable=False)
+    value = Column(String, nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", onupdate="NO ACTION"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+    # defines relationship b/w 'data' and 'users' table
+    owner = relationship("Users")
