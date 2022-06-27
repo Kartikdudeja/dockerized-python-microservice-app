@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   pyapp:
-    
+
+    container_name: pyapp
+
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,26 +19,35 @@ services:
       - 8000:8000
 
     depends_on:
-      - mysql
+      - postgresdb
       - redis
 
-  mysql:
+  postgresdb:
     
-    image: mysql:5.7
+    container_name: psqldb
+
+    image: postgres:13-alpine
     
     volumes:
-      - mysql_data:/var/lib/mysql
+      - psql_data:/var/lib/postgresql/data
     
     expose:
-      - 3306
+      - 5432
 
     environment:
-      - MYSQL_ROOT_PASSWORD=mysql
-      - MYSQL_DATABASE=mysql
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
 
   redis:
 
+    container_name: redis
+
     image: redis:alpine3.16
 
+    volumes:
+      - redis_data:/data
+
 volumes:
-  mysql_data:
+  psql_data:
+  redis_data:
