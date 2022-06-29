@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-import logging
 
 from routers import login, data
-
 from database import models
 from database.database import engine
 
@@ -10,6 +8,7 @@ from database.database import engine
 app = FastAPI()
 
 # logging instance
+import logging
 logger = logging.getLogger(__name__)
 
 # logging configuration
@@ -26,19 +25,4 @@ app.include_router(data.router)
 @app.get ("/")
 async def root():
     logger.info('Request Received for default Path')
-    return {"message": "Application is Running"}
-
-# database connected logic
-
-# @app.on_event("startup")
-# async def startup():
-#     if not database.is_connected:
-#         await database.connect()
-#     # create a dummy entry
-#     await User.objects.get_or_create(email="test@test.com")
-
-
-# @app.on_event("shutdown")
-# async def shutdown():
-#     if database.is_connected:
-#         await database.disconnect()
+    return {"message": "Application is Running."}

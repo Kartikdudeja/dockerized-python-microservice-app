@@ -12,7 +12,12 @@ logger = logging.getLogger(__name__)
 
 # SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/hostname>/<database-name>"
 
+# local database connection string
+# SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:postgres@localhost:5432/postgres"
+
+# docker database
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@psqldb/postgres"
+
 
 # database engine to create db tables
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -47,3 +52,19 @@ def get_db():
 #         logger.error("Failed to connect to Redis. Retrying in 3 seconds...")
 #         time.sleep(3)
 #         continue
+
+
+# database connected logic
+
+# @app.on_event("startup")
+# async def startup():
+#     if not database.is_connected:
+#         await database.connect()
+#     # create a dummy entry
+#     await User.objects.get_or_create(email="test@test.com")
+
+
+# @app.on_event("shutdown")
+# async def shutdown():
+#     if database.is_connected:
+#         await database.disconnect()

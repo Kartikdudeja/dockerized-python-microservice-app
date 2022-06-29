@@ -17,6 +17,7 @@ class LoginResponse (BaseModel, extra=Extra.forbid):
 class SignUpResponse (BaseModel, extra=Extra.forbid):
     status: str
     username: EmailStr
+    message: str
 
 class Data (BaseModel, extra=Extra.forbid):
     key: str
