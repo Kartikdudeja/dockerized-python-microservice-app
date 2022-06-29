@@ -9,10 +9,15 @@ class SignUp (BaseModel, extra=Extra.forbid):
     email: EmailStr
     password: str
 
+class Token(BaseModel):
+    accessToken: str
+    tokenType: str
+    expiresIn: int
+
 class LoginResponse (BaseModel, extra=Extra.forbid):
     status: str
     username: EmailStr
-    token: str    
+    token: Token
 
 class SignUpResponse (BaseModel, extra=Extra.forbid):
     status: str
@@ -22,3 +27,4 @@ class SignUpResponse (BaseModel, extra=Extra.forbid):
 class Data (BaseModel, extra=Extra.forbid):
     key: str
     value: str
+
