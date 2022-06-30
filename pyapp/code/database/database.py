@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 # SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/hostname>/<database-name>"
 
 # local database connection string
-# SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:postgres@localhost:5432/postgres"
+SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:postgres@localhost:5432/postgres"
 
 # docker database
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@psqldb/postgres"
+# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@psqldb/postgres"
 
 
 # database engine to create db tables

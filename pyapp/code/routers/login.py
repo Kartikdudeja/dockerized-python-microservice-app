@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN , HTTP_409_CONFLICT
 
 from sqlalchemy.orm import Session
@@ -19,8 +20,7 @@ router = APIRouter (
 )
 
 @router.post ("/", response_model= LoginResponse)
-# @router.post("/")
-async def login (body: Login, db: Session = Depends(get_db)):
+async def login (body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     
     logger.info(f'login request received for username: {body.username}')
     

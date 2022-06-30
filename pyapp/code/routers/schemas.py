@@ -28,3 +28,10 @@ class Data (BaseModel, extra=Extra.forbid):
     key: str
     value: str
 
+class DataResponse (BaseModel, extra=Extra.forbid):
+    status: str
+    message: str
+
+class TokenData(BaseModel):
+    id: str = None
+    email: str = None

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 # logging configuration
 # logging.basicConfig(level=logging.INFO, filename='app.log', format="%(asctime)s: %(levelname)s: [%(process)d:%(processName)s] (%(filename)s-%(module)s.%(funcName)s): %(message)s")
-logging.basicConfig(level=logging.INFO, filename='app.log', format="%(asctime)s: %(levelname)s: (%(filename)s-%(module)s.%(funcName)s): %(message)s")
+logging.basicConfig(level=logging.INFO, filename='app.log', format="%(asctime)s: %(levelname)s: [%(filename)s-%(module)s.%(funcName)s]: %(message)s")
 
 # ORM Engine to create DB Tables using models.py file
 models.Base.metadata.create_all(bind=engine)
