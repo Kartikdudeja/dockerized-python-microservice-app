@@ -14,10 +14,11 @@ logger = logging.getLogger(__name__)
 
 # local database connection string
 SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:postgres@localhost:5432/postgres"
+redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 # docker database
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@psqldb/postgres"
-
+# redisClient = redis.Redis(host=redisdb, port=6379, db=0)
 
 # database engine to create db tables
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

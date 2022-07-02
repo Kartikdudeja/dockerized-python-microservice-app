@@ -7,17 +7,21 @@ from sqlalchemy.exc import IntegrityError
 from starlette.responses import Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
+from datetime import timedelta
+
 import logging
 logger = logging.getLogger(__name__)
 
 from routers.schemas import Data, DataResponse, UpdateData
-from database.database import get_db
+from database.database import get_db, redisClient
 from database import models
 from utils.oauth2 import getCurrentUser
 
 router = APIRouter (
     prefix= "/apigw/data"
 )
+
+REDIS_KEY_EXPIRE_MINUTE=5
 
 @router.post ("/", status_code=HTTP_201_CREATED, response_model= DataResponse)
 async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
@@ -34,6 +38,9 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
         db.add(newData)
         db.commit()
         db.refresh(newData)
+
+        logger.info(f"putting value in redis cache; key: '{newData.key}' & value: '{newData.value}'")
+        redisClient.set(newData.key, newData.value, timedelta(minutes=REDIS_KEY_EXPIRE_MINUTE))
 
     except IntegrityError:
         # rollback in case of exception
@@ -53,17 +60,33 @@ async def readData (key: str, db: Session = Depends(get_db), loggedIn: str = Dep
     
     logger.info(f"Get Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
 
-    dataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
-    data = dataQuery.first()
-
-    if not data:
-        logger.error(f"No Result found for the key: '{key}'")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
+    cacheData = redisClient.get(key)
     
-    logger.info(f"result found for key: '{key}'")
-    resData = {"key": data.key, "value": data.value}
+    if not cacheData:
+        logger.info(f"cache miss for key: '{key}'; Querying RDBMS")
 
-    return resData
+        dataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+        data = dataQuery.first()
+
+        if not data:
+            logger.info(f"No Result found for the key: '{key}'")
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
+        
+        logger.info(f"result found for key: '{key}'")
+        resData = {"key": data.key, "value": data.value}
+
+        logger.info(f"putting value in redis cache; key: '{data.key}' & value: '{data.value}'")
+        redisClient.set(data.key, data.value, timedelta(minutes=REDIS_KEY_EXPIRE_MINUTE))
+
+        return resData
+
+    else:
+        logger.info(f"cache hit for the key: '{key}'")
+        resData = {"key": key, "value": cacheData}
+        return resData
+
+def readAllData():
+    pass
 
 @router.put ("/{key}", status_code=HTTP_202_ACCEPTED, response_model= DataResponse)
 async def updateData (key: str, value: UpdateData, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):

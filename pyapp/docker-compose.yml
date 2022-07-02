@@ -39,9 +39,9 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
 
-  redis:
+  redisdb:
 
-    container_name: redis
+    container_name: redisdb
 
     image: redis:alpine3.16
 
