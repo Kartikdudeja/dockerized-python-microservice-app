@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY = "21de31bb6d8d924056a0089f6f49680b0e9e14ee906c8a0444b0a155d74821b8"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTE=5
+ACCESS_TOKEN_EXPIRE_MINUTE=30
 
 # login credential should be in form data not raw json
 oauthSchema = OAuth2PasswordBearer(tokenUrl='/apigw/login')

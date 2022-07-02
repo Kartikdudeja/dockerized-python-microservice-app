@@ -4,12 +4,13 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
+from starlette.responses import Response
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 import logging
 logger = logging.getLogger(__name__)
 
-from routers.schemas import Data, DataResponse
+from routers.schemas import Data, DataResponse, UpdateData
 from database.database import get_db
 from database import models
 from utils.oauth2 import getCurrentUser
@@ -47,18 +48,73 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
 
     return resData
 
-@router.get ("/")
-async def readData ():
-    pass
+@router.get ("/{key}", status_code=HTTP_200_OK, response_model= Data)
+async def readData (key: str, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
+    
+    logger.info(f"Get Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
 
-@router.get ("/{id}", response_model= Data)
-async def readDataById (id: int):
-    pass
+    dataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+    data = dataQuery.first()
 
-@router.put ("/{id}")
-async def updateDataById (id: int):
-    pass
+    if not data:
+        logger.error(f"No Result found for the key: '{key}'")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
+    
+    logger.info(f"result found for key: '{key}'")
+    resData = {"key": data.key, "value": data.value}
 
-@router.delete ("/{id}")
-async def deleteDataById (id: int):
-    pass
+    return resData
+
+@router.put ("/{key}", status_code=HTTP_202_ACCEPTED, response_model= DataResponse)
+async def updateData (key: str, value: UpdateData, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
+    
+    logger.info(f"Update Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
+
+    updateQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+    update = updateQuery.first()
+
+    if not update:
+        logger.error(f"No Result found for the key: '{key}'")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
+    
+    logger.info(f"result found for key: '{key}'")
+
+    if update.ownerId != loggedIn.id:
+
+        logger.error(f'User ID: {loggedIn.id} is not authorized to perform requested action')
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not Authorized to perform requested action")
+
+    updateQuery.update(value.dict(), synchronize_session=False)
+    db.commit()
+
+    logger.info(f"data updated; key: {key}, value: {update.value}")
+    
+    resData = {"status": "Success", "message": f"value for the key: '{key}' Updated"}
+
+    return resData
+
+@router.delete ("/{key}", status_code=HTTP_204_NO_CONTENT)
+async def deleteData (key: str, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
+
+    logger.info(f"delete Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
+
+    deleteQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+    delete = deleteQuery.first()
+
+    if not delete:
+        logger.error(f"No Result found for the key: '{key}'")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
+    
+    logger.info(f"result found for key: '{key}'")
+
+    if delete.ownerId != loggedIn.id:
+
+        logger.error(f'User ID: {loggedIn.id} is not authorized to perform requested action')
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not Authorized to perform requested action")
+
+    deleteQuery.delete(synchronize_session=False)
+    db.commit()
+
+    logger.info(f"data deleted; key: '{key}'")
+    
+    return Response(status_code=HTTP_204_NO_CONTENT)

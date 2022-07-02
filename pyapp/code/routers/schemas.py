@@ -32,6 +32,9 @@ class DataResponse (BaseModel, extra=Extra.forbid):
     status: str
     message: str
 
+class UpdateData (BaseModel, extra=Extra.forbid):
+    value: str
+
 class TokenData(BaseModel):
     id: str = None
     email: str = None

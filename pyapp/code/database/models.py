@@ -24,7 +24,7 @@ class Data(Base):
 
     # 'data' table store the key-value pair
 
-    id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     key = Column(String, primary_key=True, index=True, nullable=False, unique=True)
     value = Column(String, nullable=False)
     ownerId = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", onupdate="NO ACTION"), nullable=False)
