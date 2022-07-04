@@ -10,3 +10,4 @@ bcrypt
 jose
 python-jose[cryptography]
 redis
+dotenv

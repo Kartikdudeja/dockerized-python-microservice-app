@@ -32,6 +32,14 @@ class DataResponse (BaseModel, extra=Extra.forbid):
     status: str
     message: str
 
+class DataAll (BaseModel):
+    key: str
+    value: str
+
+    class Config:
+        orm_mode = True
+        extra=Extra.forbid
+
 class UpdateData (BaseModel, extra=Extra.forbid):
     value: str
 

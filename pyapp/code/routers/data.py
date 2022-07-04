@@ -5,23 +5,32 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from starlette.responses import Response
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
 from datetime import timedelta
+from typing import List, Optional
 
 import logging
 logger = logging.getLogger(__name__)
 
-from routers.schemas import Data, DataResponse, UpdateData
+from routers.schemas import Data, DataResponse, UpdateData, DataAll
 from database.database import get_db, redisClient
 from database import models
 from utils.oauth2 import getCurrentUser
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+REDIS_KEY_EXPIRE_MINUTE = int(os.getenv('REDIS_KEY_EXPIRE_MINUTE'))
+
+LIMIT=10
+OFFSET=0
+
 router = APIRouter (
     prefix= "/apigw/data"
 )
-
-REDIS_KEY_EXPIRE_MINUTE=5
 
 @router.post ("/", status_code=HTTP_201_CREATED, response_model= DataResponse)
 async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
@@ -60,6 +69,7 @@ async def readData (key: str, db: Session = Depends(get_db), loggedIn: str = Dep
     
     logger.info(f"Get Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
 
+
     cacheData = redisClient.get(key)
     
     if not cacheData:
@@ -85,8 +95,24 @@ async def readData (key: str, db: Session = Depends(get_db), loggedIn: str = Dep
         resData = {"key": key, "value": cacheData}
         return resData
 
-def readAllData():
-    pass
+@router.get ("/", status_code=HTTP_200_OK, response_model=List[DataAll])
+# @router.get ("/", status_code=HTTP_200_OK)
+def readAllData(search: Optional[str] = "", limit: int = LIMIT, offset: int = OFFSET, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):
+    
+    logger.info(f'Get All Account Details Request from User ID: {loggedIn.id}')
+
+    if limit > LIMIT:
+        logger.error(f'Limit Error: Parameter Value ({limit}) is greater than defined Threshold')
+        raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="You cannot request more than 10 items")
+
+    allDataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key.contains(search)).limit(limit).offset(offset)
+    allData = allDataQuery.all()
+
+    if allData is None:
+        logger.error(f"No Result found for used id: {loggedIn.id}")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found")
+
+    return allData
 
 @router.put ("/{key}", status_code=HTTP_202_ACCEPTED, response_model= DataResponse)
 async def updateData (key: str, value: UpdateData, db: Session = Depends(get_db), loggedIn: str = Depends(getCurrentUser)):

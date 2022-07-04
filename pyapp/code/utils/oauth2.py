@@ -14,9 +14,14 @@ from database import models
 import logging
 logger = logging.getLogger(__name__)
 
-SECRET_KEY = "21de31bb6d8d924056a0089f6f49680b0e9e14ee906c8a0444b0a155d74821b8"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTE=30
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTE = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTE'))
 
 # login credential should be in form data not raw json
 oauthSchema = OAuth2PasswordBearer(tokenUrl='/apigw/login')
