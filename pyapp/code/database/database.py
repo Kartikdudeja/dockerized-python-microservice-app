@@ -27,12 +27,12 @@ REDIS_PORT = os.getenv('REDIS_PORT')
 # SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/hostname>/<database-name>"
 
 # local database connection string
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{TEST_DATABASE_HOSTNAME}/{DATABASE_NAME}"
-redisClient = redis.Redis(host=f"{TEST_REDIS_HOSTNAME}", port=f"{REDIS_PORT}", db=f"{REDIS_DATABASE}")
+# SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{TEST_DATABASE_HOSTNAME}/{DATABASE_NAME}"
+# redisClient = redis.Redis(host=f"{TEST_REDIS_HOSTNAME}", port=f"{REDIS_PORT}", db=f"{REDIS_DATABASE}")
 
 # docker database
-# SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DOCKER_DATABASE_HOSTNAME}/{DATABASE_NAME}"
-# redisClient = redis.Redis(host=f"{DOCKER_REDIS_HOSTNAME}", port=f"{REDIS_PORT}", db=f"{REDIS_DATABASE}")
+SQLALCHEMY_DATABASE_URL = f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DOCKER_DATABASE_HOSTNAME}/{DATABASE_NAME}"
+redisClient = redis.Redis(host=f"{DOCKER_REDIS_HOSTNAME}", port=f"{REDIS_PORT}", db=f"{REDIS_DATABASE}")
 
 # database engine to create db tables
 engine = create_engine(SQLALCHEMY_DATABASE_URL)

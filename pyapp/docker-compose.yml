@@ -13,7 +13,7 @@ services:
     #command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn main:app --host 0.0.0.0 --port 8000'
     
     volumes:
-      - ./code:/src
+      - ./code:/src:ro
     
     ports:
       - 8000:8000
@@ -22,6 +22,10 @@ services:
       - postgresdb
       - redisdb
 
+    networks:
+      custom-network:
+        ipv4_address: 172.24.2.3
+
   postgresdb:
     
     container_name: psqldb
@@ -29,7 +33,7 @@ services:
     image: postgres:13-alpine
     
     volumes:
-      - psql_data:/var/lib/postgresql/data
+      - psql_data:/var/lib/postgresql/data:rw
     
     expose:
       - 5432
@@ -39,6 +43,13 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
 
+    networks:
+      custom-network:
+        ipv4_address: 172.24.2.4
+        # IP for other instance of Postgres DB
+        # ipv4_address: 172.24.2.5
+
+
   redisdb:
 
     container_name: redisdb
@@ -46,11 +57,23 @@ services:
     image: redis:alpine3.16
 
     volumes:
-      - redis_data:/data
+      - redis_data:/data:rw
 
     expose:
       - 6379
 
+    networks:
+      custom-network:
+        ipv4_address: 172.24.2.6
+
 volumes:
   psql_data:
   redis_data:
+
+networks:
+  custom-network: 
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.24.2.0/16
+         gateway: 172.24.2.1
