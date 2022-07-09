@@ -5,39 +5,40 @@ services:
   nginx:
 
     image: nginx:1.23-alpine
-
     container_name: nginx-proxy
     hostname: nginx-proxy
-
+    
     ports:
       - 80:80
-
+    
     volumes:
        - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
     depends_on:
       - pyapp
 
-    networks:
+    networks:    
       custom-network:
         ipv4_address: 172.24.2.2
 
   pyapp:
 
-    container_name: pyapp
-
+    # container_name: pyapp
     build:
       context: .
       dockerfile: Dockerfile
       
     command: uvicorn main:app --host 0.0.0.0 --port 8000
-    #command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn main:app --host 0.0.0.0 --port 8000'
+    # command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn main:app --host 0.0.0.0 --port 8000'
     
     volumes:
       - ./code:/src:rw
     
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
+    
+    expose:
+      - 8000
 
     depends_on:
       - postgresdb
@@ -45,17 +46,20 @@ services:
 
     networks:
       custom-network:
-        ipv4_address: 172.24.2.3
+    
+    deploy:
+      mode: replicated
+      replicas: 2
 
   postgresdb:
     
-    container_name: psqldb
-
     image: postgres:13-alpine
+    container_name: psqldb
+    restart: always
     
     volumes:
       - psql_data:/var/lib/postgresql/data:rw
-    
+      
     expose:
       - 5432
 
@@ -66,15 +70,32 @@ services:
 
     networks:
       custom-network:
-        ipv4_address: 172.24.2.4
-        # IP for other instance of Postgres DB
-        # ipv4_address: 172.24.2.5
+        ipv4_address: 172.24.2.5
 
+  # postgresdb02:
+    
+  #   image: postgres:13-alpine
+  #   container_name: psqldb-slave
+  #   restart: always
+    
+  #   volumes:
+  #     - psql_data:/var/lib/postgresql/data:rw
+      
+  #   expose:
+  #     - 5432
 
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=postgres
+
+  #   networks:
+  #     custom-network:
+  #       ipv4_address: 172.24.2.6
+      
   redisdb:
 
     container_name: redisdb
-
     image: redis:alpine3.16
 
     volumes:
@@ -85,7 +106,7 @@ services:
 
     networks:
       custom-network:
-        ipv4_address: 172.24.2.6
+        ipv4_address: 172.24.2.7
 
 volumes:
   psql_data:
@@ -97,4 +118,4 @@ networks:
     ipam:
      config:
        - subnet: 172.24.2.0/16
-         gateway: 172.24.2.1
+         gateway: 172.24.2.0
