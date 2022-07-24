@@ -2,7 +2,7 @@ GET http://localhost:3000/items
 
 ###
 
-GET http://localhost:3000/items/62dd7f02fea55ba4f63d75fe
+GET http://localhost:3000/items/62dd8621fed134aa00063dd1
 
 ### 
 POST http://localhost:3000/items
