@@ -1,0 +1,27 @@
+GET http://localhost:3000/items
+
+###
+
+GET http://localhost:3000/items/62dd7f02fea55ba4f63d75fe
+
+### 
+POST http://localhost:3000/items
+Content-Type: application/json
+
+{
+    "key": "some",
+    "value": "data"
+}
+
+###
+
+DELETE http://localhost:3000/items/62dd7ee1fea55ba4f63d75f9
+
+###
+
+PATCH http://localhost:3000/items/62dd73a3acc4a3692945d8eb
+Content-Type: application/json
+
+{
+    "value": "info"
+}

@@ -41,7 +41,7 @@ services:
       - 8000
 
     depends_on:
-      - postgresdb
+      - postgres-primary
       - redisdb
 
     networks:
@@ -51,14 +51,15 @@ services:
       mode: replicated
       replicas: 2
 
-  postgresdb:
+  postgres-primary:
     
     image: postgres:13-alpine
     container_name: psqldb
+    # container_name: psqldb-primary
     restart: always
     
     volumes:
-      - psql_data:/var/lib/postgresql/data:rw
+      - ./psqlData:/var/lib/postgresql/data:rw
       
     expose:
       - 5432
@@ -71,51 +72,30 @@ services:
     networks:
       custom-network:
         ipv4_address: 172.24.2.5
-
-  # postgresdb02:
-    
-  #   image: postgres:13-alpine
-  #   container_name: psqldb-slave
-  #   restart: always
-    
-  #   volumes:
-  #     - psql_data:/var/lib/postgresql/data:rw
-      
-  #   expose:
-  #     - 5432
-
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=postgres
-
-  #   networks:
-  #     custom-network:
-  #       ipv4_address: 172.24.2.6
       
   redisdb:
 
-    container_name: redisdb
     image: redis:alpine3.16
-
+    container_name: redisdb
+    
     volumes:
-      - redis_data:/data:rw
+      - ./redisData:/data:rw
 
     expose:
       - 6379
 
     networks:
       custom-network:
-        ipv4_address: 172.24.2.7
+        ipv4_address: 172.24.2.5
 
 volumes:
-  psql_data:
-  redis_data:
+  psqlData:
+  redisData:
 
 networks:
   custom-network: 
     driver: bridge
     ipam:
      config:
-       - subnet: 172.24.2.0/16
-         gateway: 172.24.2.0
+       - subnet: 172.24.2.0/28
+         gateway: 172.24.2.1
