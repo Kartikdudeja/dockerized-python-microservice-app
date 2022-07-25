@@ -10,10 +10,12 @@ WORKDIR /src
 RUN apt-get update && apt-get -y install libpq-dev gcc
 RUN python -m pip install --upgrade pip
 
-COPY ./code/requirements.txt /src/
+#COPY ./code/requirements.txt /src/
+COPY ./pyapp/code/requirements.txt /src
 RUN pip install -r requirements.txt
 
-COPY ./code /src/
+#COPY ./code /src/
+COPY ./pyapp/code /src
 
 EXPOSE 8000
 

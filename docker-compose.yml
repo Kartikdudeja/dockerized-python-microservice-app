@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: nginx:1.23-alpine
+    container_name: nginx-proxy
+    hostname: nginx-proxy
+    
+    ports:
+      - 5000:80
+    
+    volumes:
+       - ./pyapp/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      - pyapp
+
+    networks:    
+      custom-network:
+
+  pyapp:  
+    build: 
+      context: .
+      dockerfile: ./pyapp/Dockerfile
+      
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    
+    volumes:
+      - ./pyapp/code:/src:rw
+    
+    expose:
+      - 8000
+
+    depends_on:
+      - postgres-primary
+      - redisdb
+
+    networks:
+      custom-network:
+    
+    deploy:
+      mode: replicated
+      replicas: 2
+
+  postgres-primary:
+    image: postgres:13-alpine
+    container_name: psqldb
+    restart: always
+    
+    volumes:
+      - ./pyapp/psqlData:/var/lib/postgresql/data:rw
+      
+    expose:
+      - 5432
+
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+
+    networks:
+      custom-network:
+        
+  redisdb:
+
+    image: redis:alpine3.16
+    container_name: redisdb
+    
+    restart: always
+    
+    volumes:
+      - ./pyapp/redisData:/data:rw
+
+    expose:
+      - 6379
+
+    networks:
+      custom-network:
+        
+  node:
+    container_name: nodeapp
+
+    build: 
+      context: .
+      dockerfile: ./node/Dockerfile
+      
+    expose:
+      - 3000
+
+    depends_on:
+      - mongo
+
+    networks:    
+      custom-network:
+
+  mongo:
+
+    image: mongo:4.2-bionic
+    container_name: mongodb
+
+    restart: always
+
+    expose:
+      - 27017
+
+    volumes:
+      - ./node/mongoData:/data/db
+
+    networks:    
+      custom-network:
+
+volumes:
+  psqlData:
+  redisData:
+  mongoData:
+
+networks:
+  custom-network: 
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.24.2.0/28
+         gateway: 172.24.2.1
