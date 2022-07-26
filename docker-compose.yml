@@ -84,12 +84,15 @@ services:
     build: 
       context: .
       dockerfile: ./node/Dockerfile
-      
+
     expose:
       - 3000
 
+    command: node /usr/src/app/consumer.js
+
     depends_on:
       - mongo
+      - queue
 
     networks:    
       custom-network:
@@ -106,6 +109,24 @@ services:
 
     volumes:
       - ./node/mongoData:/data/db
+
+    networks:    
+      custom-network:
+
+  queue:
+    image: rabbitmq:3-management
+    container_name: queue
+
+    restart: always
+    
+    ports:
+      - 15672:15672
+
+    expose:
+      - 5672
+
+    depends_on:
+      - pyapp
 
     networks:    
       custom-network:
