@@ -17,6 +17,7 @@ from routers.schemas import Data, DataResponse, UpdateData, DataAll
 from database.database import get_db, redisClient
 from database import models
 from utils.oauth2 import getCurrentUser
+from utils.producer import producer
 
 import os
 from dotenv import load_dotenv
@@ -48,9 +49,6 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
         db.commit()
         db.refresh(newData)
 
-        logger.info(f"putting value in redis cache; key: '{newData.key}' & value: '{newData.value}'")
-        redisClient.set(newData.key, newData.value, timedelta(minutes=REDIS_KEY_EXPIRE_MINUTE))
-
     except IntegrityError:
         # rollback in case of exception
         db.rollback()
@@ -59,6 +57,14 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
         raise HTTPException(status_code=HTTP_409_CONFLICT, detail=f"key : '{body.key}' already exist")
 
     logger.info(f"new data added; key: {body.key}, value: {body.value}")
+    logger.info(f"putting value in redis cache; key: '{newData.key}' & value: '{newData.value}'")
+    redisClient.set(newData.key, newData.value, timedelta(minutes=REDIS_KEY_EXPIRE_MINUTE))
+
+    # Publish Message to the Queue.
+    MESSAGE=f'{{"key": "{body.key}", "value": "{body.value}"}}'
+    logger.info(f"Calling Producer Function to Publish Message to the Queue: {MESSAGE}")
+    producer(MESSAGE)
+
     
     resData = {"status": "Success", "message": "key-value pair added"}
 

@@ -11,3 +11,4 @@ jose
 python-jose[cryptography]
 redis
 python-dotenv
+pika
