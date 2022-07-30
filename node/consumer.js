@@ -7,8 +7,28 @@
 var amqp = require('amqplib/callback_api');
 var request = require('request');
 
-const QUEUE_URL=process.env.QUEUE_URL
-const QUEUE_NAME=process.env.QUEUE_NAME
+require('dotenv').config()
+const QUEUE_URL = process.env.QUEUE_URL
+const QUEUE_NAME = process.env.QUEUE_NAME
+
+async function createApiCall(reqBody){
+
+    var options = {
+        'method': 'POST',
+        'url': 'http://localhost:3000/items/',
+        'headers': {
+        'Content-Type': 'application/json'
+    },
+        
+    body: reqBody
+      
+    };
+    
+    await request(options, function (error, response) {
+        if (error) throw new Error(error);
+        console.log(response.body);
+    });
+}
 
 amqp.connect(QUEUE_URL , function(error0, connection) {
     if (error0) {
@@ -20,7 +40,7 @@ amqp.connect(QUEUE_URL , function(error0, connection) {
         }
 
         var queue = QUEUE_NAME;
-
+        
         channel.assertQueue(queue, {
             durable: false
         });
@@ -31,22 +51,10 @@ amqp.connect(QUEUE_URL , function(error0, connection) {
         console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
 
         channel.consume(queue, function(msg) {
-            console.log(" [x] Received '%s'; Calling CREATE Endpoint", msg.content.toString());
-            
-            var options = {
-              'method': 'POST',
-              'url': 'http://localhost:3000/items',
-              'headers': {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(msg.content.toString())
-            
-            };
-            request(options, function (error, response) {
-              if (error) throw new Error(error);
-              console.log(response.body);
-            });
-        
+            console.log(" [x] Received '%s'; Calling CREATE Endpoint", msg.content.toString()); 
+            console.log(msg.content.toString())
+            createApiCall(msg.content.toString());
+
         }, {
             noAck: true
         });

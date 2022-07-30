@@ -62,7 +62,11 @@ def producer(MESSAGE):
 def Publisher():
 
     logger.info('test function called, retreiving data from database')
-    #conn = psycopg2.connect(host=TEST_DATABASE_HOSTNAME, database=DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD, cursor_factory=RealDictCursor)
+
+    # Testing Database (localhost)
+    # conn = psycopg2.connect(host=TEST_DATABASE_HOSTNAME, database=DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD, cursor_factory=RealDictCursor)
+    
+    # Production Database (docker)
     conn = psycopg2.connect(host=DOCKER_DATABASE_HOSTNAME, database=DATABASE_NAME, user=DATABASE_USERNAME, password=DATABASE_PASSWORD, cursor_factory=RealDictCursor)
 
     # Open a cursor to perform database operations
@@ -83,7 +87,7 @@ def Publisher():
     for index in range(len(data)):
         key = data[index]['key']
         value = data[index]['value']
-        MESSAGE = f'{{"key": {key}, "value": {value}}}'
+        MESSAGE = f'{{"key": "{key}", "value": "{value}"}}'
 
         logger.info(f" Publishing the Message: '{MESSAGE}' to the queue.")
         producer(MESSAGE)
