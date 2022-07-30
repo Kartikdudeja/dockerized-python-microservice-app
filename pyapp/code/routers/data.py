@@ -43,7 +43,7 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
     logger.info(f"create data request received from user: '{loggedIn.id}'; data: {body}")
 
     try:
-        newData = models.Data(**body.dict(), ownerId=loggedIn.id)
+        newData = models.Data(**body.dict(), owner_id=loggedIn.id)
 
         db.add(newData)
         db.commit()
@@ -61,9 +61,9 @@ async def createData (body: Data, db: Session = Depends(get_db), loggedIn: str =
     redisClient.set(newData.key, newData.value, timedelta(minutes=REDIS_KEY_EXPIRE_MINUTE))
 
     # Publish Message to the Queue.
-    MESSAGE=f'{{"key": "{body.key}", "value": "{body.value}"}}'
-    logger.info(f"Calling Producer Function to Publish Message to the Queue: {MESSAGE}")
-    producer(MESSAGE)
+    # MESSAGE=f'{{"key": "{body.key}", "value": "{body.value}"}}'
+    # logger.info(f"Calling Producer Function to Publish Message to the Queue: {MESSAGE}")
+    # producer(MESSAGE)
 
     
     resData = {"status": "Success", "message": "key-value pair added"}
@@ -81,9 +81,9 @@ async def readData (key: str, db: Session = Depends(get_db), loggedIn: str = Dep
     if not cacheData:
         logger.info(f"cache miss for key: '{key}'; Querying RDBMS")
 
-        dataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+        dataQuery = db.query(models.Data).filter(models.Data.owner_id == loggedIn.id).filter(models.Data.key == key)
         data = dataQuery.first()
-
+        
         if not data:
             logger.info(f"No Result found for the key: '{key}'")
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"No Result found for the key: '{key}'")
@@ -111,7 +111,7 @@ def readAllData(search: Optional[str] = "", limit: int = LIMIT, offset: int = OF
         logger.error(f'Limit Error: Parameter Value ({limit}) is greater than defined Threshold')
         raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="You cannot request more than 10 items")
 
-    allDataQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key.contains(search)).limit(limit).offset(offset)
+    allDataQuery = db.query(models.Data).filter(models.Data.owner_id == loggedIn.id).filter(models.Data.key.contains(search)).limit(limit).offset(offset)
     allData = allDataQuery.all()
 
     if allData is None:
@@ -125,7 +125,7 @@ async def updateData (key: str, value: UpdateData, db: Session = Depends(get_db)
     
     logger.info(f"Update Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
 
-    updateQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+    updateQuery = db.query(models.Data).filter(models.Data.owner_id == loggedIn.id).filter(models.Data.key == key)
     update = updateQuery.first()
 
     if not update:
@@ -134,7 +134,7 @@ async def updateData (key: str, value: UpdateData, db: Session = Depends(get_db)
     
     logger.info(f"result found for key: '{key}'")
 
-    if update.ownerId != loggedIn.id:
+    if update.owner_id != loggedIn.id:
 
         logger.error(f'User ID: {loggedIn.id} is not authorized to perform requested action')
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not Authorized to perform requested action")
@@ -153,7 +153,7 @@ async def deleteData (key: str, db: Session = Depends(get_db), loggedIn: str = D
 
     logger.info(f"delete Data Request; querying database for key: '{key}' from user id: '{loggedIn.id}'")
 
-    deleteQuery = db.query(models.Data).filter(models.Data.ownerId == loggedIn.id).filter(models.Data.key == key)
+    deleteQuery = db.query(models.Data).filter(models.Data.owner_id == loggedIn.id).filter(models.Data.key == key)
     delete = deleteQuery.first()
 
     if not delete:
@@ -162,7 +162,7 @@ async def deleteData (key: str, db: Session = Depends(get_db), loggedIn: str = D
     
     logger.info(f"result found for key: '{key}'")
 
-    if delete.ownerId != loggedIn.id:
+    if delete.owner_id != loggedIn.id:
 
         logger.error(f'User ID: {loggedIn.id} is not authorized to perform requested action')
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Not Authorized to perform requested action")

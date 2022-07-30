@@ -12,3 +12,4 @@ python-jose[cryptography]
 redis
 python-dotenv
 pika
+fastapi-utils

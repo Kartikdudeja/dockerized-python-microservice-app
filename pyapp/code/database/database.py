@@ -50,6 +50,8 @@ def get_db():
     finally:
         db.close()
 
+
+
 # Redis Connection
 # redis_client = redis.Redis(host=environment_variable.REDIS_HOSTNAME, port=environment_variable.REDIS_PORT, db=environment_variable.REDIS_DATABASE)
 

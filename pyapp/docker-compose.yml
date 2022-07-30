@@ -56,7 +56,7 @@ services:
     image: postgres:13-alpine
     container_name: psqldb
     # container_name: psqldb-primary
-    restart: always
+    # restart: always
     
     volumes:
       - ./psqlData:/var/lib/postgresql/data:rw
