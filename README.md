@@ -4,9 +4,12 @@ A Micro-service Application, built with Python, Nodejs and different software ar
 ### Technology Stack
 
 ##### *Backend:*
+
+**Micro-Service 1:**<br/>
 Language: Python<br/>
 Framework: FastAPI<br/>
 
+**Micro-Service 2:**<br/>
 Language: Nodejs<br/>
 Framework: Express<br/>
 
@@ -33,3 +36,17 @@ Rabbit MQ
 - Restful APIs to perform CRUD Operations
 - MongoDB as Document Database
 - Caching using Redis
+
+### Project's HLD
+![screenshot](https://github.com/Kartikdudeja/microservice-application/blob/main/ProjectX-HLD(with%20grid).png)
+
+### Quick Start the Project
+``` bash
+docker-compose up --build -d
+```
+
+### Swagger Documentation:
+After Starting the Application, visit the following link to access the API Documentation
+``` bash
+http://127.0.0.1:5000/docs
+```
