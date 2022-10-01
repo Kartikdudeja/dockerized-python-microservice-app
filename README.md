@@ -22,7 +22,8 @@ Cache Database: Redis
 ##### *Deployment:*
 Operating System: Linux<br/>
 Web-Proxy: Nginx<br/>
-Technology: Docker and Docker-Compose
+Technology: Docker and Docker-Compose<br/>
+CI/CD Pipeline: Jenkins
 
 ##### *Message Broker:*
 Rabbit MQ
@@ -31,6 +32,7 @@ Rabbit MQ
 - Micro-service Architecture for better scalability, faster development cycle, higher degree of fault tolerance.
 - Entire application is dockerized
 - Vertical Scaling using docker scale
+- CI/CD Pipeline using Jenkins
 - Load Balancing with Nginx
 - Message Broker for decoupling different services.
 - Restful APIs to perform CRUD Operations
