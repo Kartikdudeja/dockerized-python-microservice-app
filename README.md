@@ -21,7 +21,7 @@ Cache Database: Redis
 
 ##### *Deployment:*
 Operating System: Linux<br/>
-Web-Proxy: Nginx
+Web-Proxy: Nginx<br/>
 Technology: Docker and Docker-Compose
 
 ##### *Message Broker:*
